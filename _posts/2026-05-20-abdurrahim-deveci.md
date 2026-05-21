@@ -1,5 +1,5 @@
 ---
-title: Tanışın: Abdurrahim Deveci
+title: Tanışın Abdurrahim Deveci
 date: 2026-05-20 23:00:00 +0300
 categories: [Genel]
 tags: [tanıtım, instagram]
