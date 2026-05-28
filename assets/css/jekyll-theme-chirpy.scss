@@ -28,34 +28,34 @@
   --accent-ring: rgb(107 75 240 / 32%);
 
   /* Framework */
-  --main-bg: #fbfbfd;
-  --mask-bg: #d6d8dd;
-  --main-border-color: #ececf1;
-  --surface-border: #e9e9f0;
+  --main-bg: #f4f4f8;
+  --mask-bg: #cfd1d8;
+  --main-border-color: #e1e1ea;
+  --surface-border: #d8d8e3;
 
   /* Common */
-  --text-color: #2c2c36;
-  --text-muted-color: #6a6a78;
+  --text-color: #1b1b23;
+  --text-muted-color: #555560;
   --text-muted-highlight-color: var(--accent);
-  --heading-color: #16161d;
-  --label-color: #4a4a57;
+  --heading-color: #0d0d14;
+  --label-color: #383843;
   --blockquote-border-color: var(--accent-soft-2);
   --blockquote-text-color: #6a6a78;
   --link-color: var(--accent);
   --link-underline-color: rgb(107 75 240 / 26%);
   --button-bg: #ffffff;
-  --btn-border-color: #e7e7ef;
+  --btn-border-color: #dcdce6;
   --btn-backtotop-color: var(--accent);
-  --btn-backtotop-border-color: #e7e7ef;
+  --btn-backtotop-border-color: #dcdce6;
   --checkbox-color: #cfcfe0;
   --checkbox-checked-color: var(--accent);
 
   /* Sidebar */
   --site-title-color: #2b2b36;
   --site-subtitle-color: #74748a;
-  --sidebar-bg: #f5f5fb;
-  --sidebar-border-color: #ececf3;
-  --sidebar-muted-color: #5a5a6e;
+  --sidebar-bg: #ededf4;
+  --sidebar-border-color: #dedee9;
+  --sidebar-muted-color: #46465a;
   --sidebar-active-color: var(--accent);
   --sidebar-hover-bg: var(--accent-soft);
   --sidebar-btn-bg: #ffffff;
@@ -70,8 +70,8 @@
   --input-focus-border-color: var(--accent);
 
   /* Home / paginator */
-  --post-list-text-color: #5a5a68;
-  --btn-patinator-text-color: #55556a;
+  --post-list-text-color: #494955;
+  --btn-patinator-text-color: #44445a;
   --btn-paginator-hover-color: var(--accent-soft);
 
   /* Posts / cards */
@@ -80,7 +80,8 @@
   --btn-share-hover-color: var(--accent);
   --card-bg: #ffffff;
   --card-hover-bg: #ffffff;
-  --card-shadow: rgb(20 20 40 / 4%) 0 1px 3px 0, rgb(20 20 40 / 5%) 0 0 0 1px;
+  --card-shadow: rgb(20 20 50 / 7%) 0 2px 8px -2px,
+    rgb(20 20 50 / 9%) 0 0 0 1px;
   --footnote-target-bg: var(--accent-soft);
   --tb-odd-bg: #f8f8fc;
   --tb-border-color: #ececf3;
@@ -106,8 +107,8 @@
   --timeline-year-dot-color: #ffffff;
 
   /* Code */
-  --language-border-color: #ececf3;
-  --highlight-bg-color: #f5f5fb;
+  --language-border-color: #dedee9;
+  --highlight-bg-color: #ededf5;
   --highlighter-rouge-color: #5a3ce0;
   --inline-code-bg: rgb(107 75 240 / 7%);
   --code-color: #4a4a57;
@@ -126,23 +127,23 @@
   --accent-ring: rgb(159 139 255 / 38%);
 
   /* Framework */
-  --main-bg: #0c0d13;
+  --main-bg: #08090e;
   --mask-bg: #3a3b48;
-  --main-border-color: #1e1f2b;
-  --surface-border: #23242f;
+  --main-border-color: #282a38;
+  --surface-border: #303243;
 
   /* Common */
-  --text-color: #c8c9d6;
-  --text-muted-color: #878898;
+  --text-color: #dadbe7;
+  --text-muted-color: #9c9dae;
   --text-muted-highlight-color: var(--accent);
-  --heading-color: #eef0f7;
-  --label-color: #a6a7ba;
+  --heading-color: #f7f8fd;
+  --label-color: #b3b4c6;
   --blockquote-border-color: var(--accent-soft-2);
   --blockquote-text-color: #8a8b9c;
   --link-color: var(--accent);
   --link-underline-color: rgb(159 139 255 / 30%);
-  --button-bg: #14151e;
-  --btn-border-color: #262734;
+  --button-bg: #16171f;
+  --btn-border-color: #2f3142;
   --btn-backtotop-color: var(--accent);
   --btn-backtotop-border-color: #23242f;
   --card-header-bg: #1a1b25;
@@ -153,8 +154,8 @@
   /* Sidebar */
   --site-title-color: #eef0f7;
   --site-subtitle-color: #8a8b9c;
-  --sidebar-bg: #0a0b10;
-  --sidebar-border-color: #1b1c26;
+  --sidebar-bg: #0c0d14;
+  --sidebar-border-color: #262835;
   --sidebar-muted-color: #9a9bad;
   --sidebar-active-color: var(--accent);
   --sidebar-hover-bg: var(--accent-soft);
@@ -170,7 +171,7 @@
   --input-focus-border-color: var(--accent);
 
   /* Home / paginator */
-  --post-list-text-color: #a9aaba;
+  --post-list-text-color: #b6b7c7;
   --btn-patinator-text-color: var(--text-color);
   --btn-paginator-hover-color: var(--accent-soft);
 
@@ -178,8 +179,8 @@
   --toc-highlight: var(--accent);
   --btn-share-color: #8a8b9c;
   --btn-share-hover-color: var(--accent);
-  --card-bg: #14151e;
-  --card-hover-bg: #181a24;
+  --card-bg: #16171f;
+  --card-hover-bg: #1c1d28;
   --card-shadow: rgb(0 0 0 / 38%) 0 8px 24px -8px,
     rgb(159 139 255 / 9%) 0 0 0 1px;
   --footnote-target-bg: rgb(159 139 255 / 18%);
