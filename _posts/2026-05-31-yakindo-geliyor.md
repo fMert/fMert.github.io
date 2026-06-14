@@ -3,6 +3,7 @@ title: "Yakindo Geliyor: Anonim Tanış, Hazır Olunca Kendini Göster"
 date: 2026-05-31 20:00:00 +0300
 categories: [Genel]
 tags: [yakindo, uygulama, sosyal-medya, anonim-tanis, mobil-uygulama]
+published: false
 ---
 
 *Sosyal bağlantı kurmak hiç bu kadar güvende hissettirmemişti.*
