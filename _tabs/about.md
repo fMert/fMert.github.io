@@ -18,12 +18,6 @@ Python ile yazılmış, yapay zekâ odaklı bir terminal Markdown editörü.
 
 Queyntisen basit bir terminal editörü olarak başladı; daha sonra onu hafif, terminal öncelikli bir Obsidian alternatifine daha yakın bir yapıya dönüştürdüm. Markdown düzenleme, önizleme/kaynak modları, akış hâlinde yazma süreçleri ve yerleşik yapay zekâ asistanı özelliklerini destekliyor.
 
-### Yakindo
-
-Kotlin/Jetpack Compose ile geliştirilen Android arayüzüne ve Node.js tabanlı bir backend’e sahip, konum tabanlı anonim sosyal/sohbet uygulaması.
-
-Bu proje gerçek zamanlı mesajlaşma, sosyal keşif, kimlik doğrulama ve backend mimarisi üzerine bir çalışma alanı sunuyor.
-
 ### Aria
 
 Hafıza, ruh hâli, günlük benzeri durum takibi ve kalıcı karakter davranışına odaklanan bir masaüstü yapay zekâ arkadaşı/sohbet uygulaması.
