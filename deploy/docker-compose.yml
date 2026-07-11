@@ -1,0 +1,35 @@
+services:
+  blog:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: fmert-blog:local
+    container_name: fmert_blog
+    restart: unless-stopped
+    ports: ["127.0.0.1:8080:8080"]
+    read_only: true
+    tmpfs: [/var/cache/nginx, /var/run, /tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETGID, SETUID, NET_BIND_SERVICE]
+
+  stories:
+    build: ../story-admin
+    image: fmert-story-admin:local
+    container_name: fmert_story_admin
+    restart: unless-stopped
+    ports: ["127.0.0.1:8081:8081"]
+    environment:
+      STORY_PASSWORD: ${STORY_PASSWORD:?set STORY_PASSWORD in .env}
+      DATA_DIR: /data
+    volumes: [./data:/data]
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    healthcheck:
+      test: [CMD, /story-admin, healthcheck]
+      interval: 30s
+      timeout: 5s
+      start_period: 5s
+      retries: 3

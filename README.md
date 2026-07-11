@@ -1,6 +1,6 @@
 # fmert.me
 
-Personal blog of **Furkan Mert Bağcı** — posts about my projects (Queyntisen, Aria), software, and the occasional field research. Built with [Jekyll](https://jekyllrb.com/) and the [Chirpy](https://github.com/cotes2020/jekyll-theme-chirpy) theme, deployed to GitHub Pages.
+Personal blog of **Furkan Mert Bağcı** — posts about my projects (Queyntisen, Aria), software, and the occasional field research. Built with [Jekyll](https://jekyllrb.com/) and the [Chirpy](https://github.com/cotes2020/jekyll-theme-chirpy) theme, deployed to a personal VPS.
 
 **Live site:** <https://fmert.me>
 
@@ -11,7 +11,12 @@ Personal blog of **Furkan Mert Bağcı** — posts about my projects (Queyntisen
 
 ## Stories
 
-Stories live in [`_data/stories.yml`](_data/stories.yml). To publish one, add an entry:
+New stories are published from the password-protected `/stories-admin` page.
+The companion service in `story-admin/` stores its JSON and uploads in the
+mounted `deploy/data/` directory; story content is therefore kept across image
+rebuilds and is never committed. The Jekyll data below is an offline fallback.
+
+Fallback stories live in [`_data/stories.yml`](_data/stories.yml). Their format is:
 
 ```yaml
 - id: my-story            # unique, used for seen-state
@@ -26,14 +31,22 @@ Stories live in [`_data/stories.yml`](_data/stories.yml). To publish one, add an
   posted: 2026-07-11 18:00:00 +0300
 ```
 
-Rules (enforced client-side in `assets/js/stories.js`, since GitHub Pages is static):
+Rules enforced client-side in `assets/js/stories.js`:
 
 - A story is visible for **24 hours** after `posted`.
 - When nothing is fresh, only the newest story stays, shown dimmed as **"Son hikaye"** — until a newer one is published.
 - Viewed stories get a grey ring, persisted in `localStorage`.
-- An empty `stories.yml` hides the section entirely.
+- No live or fallback stories hides the section entirely.
 
 Implementation: `_includes/stories.html` (markup), `assets/js/stories.js` (logic), the `/* ----- Stories ----- */` section of `assets/css/jekyll-theme-chirpy.scss` (styles), and `_layouts/home.html` (Chirpy home layout override that inserts the row above the post list).
+
+The production Docker and Caddy configuration lives in `deploy/`. Create
+`deploy/.env` containing `STORY_PASSWORD=...`, then run:
+
+```bash
+cd deploy
+docker compose up -d --build
+```
 
 > Note: story images are CSS backgrounds rather than `<img>` tags, because Chirpy's `refactor-content.html` rewrites raw `<img>` markup in layout content.
 
@@ -54,7 +67,8 @@ Requires Ruby ≥ 3.1.
 
 ## Deployment
 
-Pushing to `main` triggers `.github/workflows/pages-deploy.yml`, which builds the site and publishes it to GitHub Pages.
+Pushing to `main` runs the build checks. The VPS timer pulls `main` and runs
+`deploy/update-blog.sh`; Caddy routes the static blog and story service.
 
 ## License
 

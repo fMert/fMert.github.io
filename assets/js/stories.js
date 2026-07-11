@@ -1,4 +1,4 @@
-/* Stories: 24h expiry, seen-state, fullscreen viewer. No dependencies. */
+/* Stories: live publishing, 24h expiry, seen-state, fullscreen viewer. */
 (function () {
   'use strict';
 
@@ -10,6 +10,51 @@
   var section = document.getElementById('stories');
   var viewer = document.getElementById('story-viewer');
   if (!section || !viewer) return;
+
+  function renderLiveCards(stories) {
+    var row = section.querySelector('.stories-row');
+    row.innerHTML = '';
+    stories.forEach(function (story) {
+      var card = document.createElement('button');
+      card.className = 'story-card';
+      card.hidden = true;
+      card.dataset.id = story.id;
+      card.dataset.type = story.type;
+      card.dataset.posted = story.posted;
+      card.dataset.text = story.text;
+      if (story.subtext) card.dataset.subtext = story.subtext;
+      if (story.image) card.dataset.image = story.image;
+      if (story.bg) card.dataset.bg = story.bg;
+      if (story.link) {
+        card.dataset.link = story.link;
+        card.dataset.linkLabel = story.link_label || 'Aç';
+      }
+
+      var ring = document.createElement('span');
+      ring.className = 'story-ring';
+      var preview = document.createElement('span');
+      preview.className = 'story-preview';
+      if (story.image) preview.style.backgroundImage = 'url("' + story.image + '")';
+      else if (story.bg) preview.style.background = story.bg;
+      ['story-scrim', 'story-badge', 'story-title'].forEach(function (name) {
+        var el = document.createElement('span');
+        el.className = name;
+        if (name === 'story-title') el.textContent = story.title || story.text;
+        preview.appendChild(el);
+      });
+      ring.appendChild(preview);
+      var dim = document.createElement('span');
+      dim.className = 'story-dim';
+      ring.appendChild(dim);
+      card.appendChild(ring);
+      var time = document.createElement('span');
+      time.className = 'story-time';
+      card.appendChild(time);
+      row.appendChild(card);
+    });
+  }
+
+  function start() {
 
   var seen = {};
   try {
@@ -197,4 +242,15 @@
     else if (e.key === 'ArrowRight') next();
     else if (e.key === 'ArrowLeft') prev();
   });
+
+  }
+
+  fetch('/stories-api', { cache: 'no-store' })
+    .then(function (response) {
+      if (!response.ok) throw new Error('Story service unavailable');
+      return response.json();
+    })
+    .then(renderLiveCards)
+    .then(start)
+    .catch(start); // Keep the built-in stories as an offline fallback.
 })();

@@ -1,0 +1,6 @@
+.git
+_site
+.jekyll-cache
+deploy/data
+deploy/.env
+design_handoff_blog_stories

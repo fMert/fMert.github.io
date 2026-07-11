@@ -1,0 +1,23 @@
+photos.fmert.me {
+    reverse_proxy localhost:2283
+}
+
+fmert.me {
+    encode zstd gzip
+    handle /stories-admin* {
+        reverse_proxy localhost:8081
+    }
+    handle /stories-api* {
+        reverse_proxy localhost:8081
+    }
+    handle /story-media/* {
+        reverse_proxy localhost:8081
+    }
+    handle {
+        reverse_proxy localhost:8080
+    }
+}
+
+www.fmert.me {
+    redir https://fmert.me{uri} permanent
+}
