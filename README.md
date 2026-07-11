@@ -1,6 +1,10 @@
-# fmert.me
+# fmert.me — Source Code
 
-Personal blog of **Furkan Mert Bağcı** — posts about my projects (Queyntisen, Aria), software, and the occasional field research. Built with [Jekyll](https://jekyllrb.com/) and the [Chirpy](https://github.com/cotes2020/jekyll-theme-chirpy) theme, deployed to a personal VPS.
+This repository contains the source code and content for my already-live blog, **[fmert.me](https://fmert.me)**.
+
+The production site is independently hosted and deployed on my personal VPS — **it is not hosted on GitHub Pages**. GitHub is used here for source control and build/test automation only.
+
+Personal blog of **Furkan Mert Bağcı** — posts about my projects (Queyntisen, Aria), software, and the occasional field research. Built with [Jekyll](https://jekyllrb.com/) and the [Chirpy](https://github.com/cotes2020/jekyll-theme-chirpy) theme.
 
 **Live site:** <https://fmert.me>
 
