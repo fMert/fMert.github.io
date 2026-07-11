@@ -210,6 +210,9 @@ exclude:
   - "*.gemspec"
   - docs
   - tools
+  - deploy
+  - story-admin
+  - design_handoff_blog_stories
   - README.md
   - LICENSE
   - purgecss.js
