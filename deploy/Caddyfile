@@ -4,10 +4,7 @@ photos.fmert.me {
 
 fmert.me {
     encode zstd gzip
-    handle /stories-admin* {
-        reverse_proxy localhost:8081
-    }
-    handle /stories-api* {
+    handle /stories-* {
         reverse_proxy localhost:8081
     }
     handle /story-media/* {
