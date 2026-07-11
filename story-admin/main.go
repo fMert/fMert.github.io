@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/subtle"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -13,6 +16,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -59,6 +63,8 @@ func main() {
 	mux.HandleFunc("POST /stories-api", a.create)
 	mux.HandleFunc("POST /stories-api/delete", a.delete)
 	mux.HandleFunc("GET /stories-admin", a.admin)
+	mux.HandleFunc("POST /stories-login", a.login)
+	mux.HandleFunc("POST /stories-logout", a.logout)
 	mux.Handle("GET /story-media/", http.StripPrefix("/story-media/", http.FileServer(http.Dir(filepath.Join(a.dataDir, "media")))))
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNoContent) })
 
@@ -78,7 +84,9 @@ func (a *app) list(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (a *app) admin(w http.ResponseWriter, r *http.Request) {
-	if !a.authorize(w, r) {
+	if !a.authorized(r) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		loginPage.Execute(w, r.URL.Query().Has("error"))
 		return
 	}
 	stories, err := a.load()
@@ -91,7 +99,8 @@ func (a *app) admin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *app) create(w http.ResponseWriter, r *http.Request) {
-	if !a.authorize(w, r) {
+	if !a.authorized(r) {
+		http.Redirect(w, r, "/stories-admin", http.StatusSeeOther)
 		return
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, 12<<20)
@@ -149,7 +158,8 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *app) delete(w http.ResponseWriter, r *http.Request) {
-	if !a.authorize(w, r) {
+	if !a.authorized(r) {
+		http.Redirect(w, r, "/stories-admin", http.StatusSeeOther)
 		return
 	}
 	id := r.FormValue("id")
@@ -177,14 +187,45 @@ func (a *app) delete(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/stories-admin", http.StatusSeeOther)
 }
 
-func (a *app) authorize(w http.ResponseWriter, r *http.Request) bool {
-	_, password, ok := r.BasicAuth()
-	ok = ok && subtle.ConstantTimeCompare([]byte(password), []byte(a.password)) == 1
-	if !ok {
-		w.Header().Set("WWW-Authenticate", `Basic realm="Story publisher"`)
-		http.Error(w, "Login required", http.StatusUnauthorized)
+func (a *app) login(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
+	if err := r.ParseForm(); err != nil || subtle.ConstantTimeCompare([]byte(r.FormValue("password")), []byte(a.password)) != 1 {
+		http.Redirect(w, r, "/stories-admin?error=1", http.StatusSeeOther)
+		return
 	}
-	return ok
+	http.SetCookie(w, &http.Cookie{Name: "story_session", Value: a.sessionToken(), Path: "/", MaxAge: 7 * 24 * 60 * 60, Secure: true, HttpOnly: true, SameSite: http.SameSiteStrictMode})
+	http.Redirect(w, r, "/stories-admin", http.StatusSeeOther)
+}
+
+func (a *app) logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{Name: "story_session", Path: "/", MaxAge: -1, Secure: true, HttpOnly: true, SameSite: http.SameSiteStrictMode})
+	http.Redirect(w, r, "/stories-admin", http.StatusSeeOther)
+}
+
+func (a *app) sessionToken() string {
+	expires := strconv.FormatInt(time.Now().Add(7*24*time.Hour).Unix(), 10)
+	mac := hmac.New(sha256.New, []byte(a.password))
+	mac.Write([]byte(expires))
+	return expires + "." + base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+}
+
+func (a *app) authorized(r *http.Request) bool {
+	cookie, err := r.Cookie("story_session")
+	if err != nil {
+		return false
+	}
+	parts := strings.SplitN(cookie.Value, ".", 2)
+	if len(parts) != 2 {
+		return false
+	}
+	expires, err := strconv.ParseInt(parts[0], 10, 64)
+	if err != nil || expires < time.Now().Unix() {
+		return false
+	}
+	mac := hmac.New(sha256.New, []byte(a.password))
+	mac.Write([]byte(parts[0]))
+	signature, err := base64.RawURLEncoding.DecodeString(parts[1])
+	return err == nil && hmac.Equal(signature, mac.Sum(nil))
 }
 
 func (a *app) load() ([]Story, error) {
@@ -264,11 +305,17 @@ func env(name, fallback string) string {
 	return fallback
 }
 
+var loginPage = template.Must(template.New("login").Parse(`<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hikâye girişi</title><style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#101018;color:#eee;font:16px system-ui,sans-serif}main{width:min(92%,400px);background:#1c1c28;padding:26px;border-radius:16px}h1{margin-top:0}label{display:grid;gap:8px;color:#bbb}input,button{width:100%;font:inherit;color:#fff;background:#29293a;border:1px solid #45455d;border-radius:9px;padding:13px}button{margin-top:16px;border:0;background:#745bea;font-weight:700}.error{color:#ff8d9d}
+</style></head><body><main><h1>Hikâye yayınla</h1><p>Devam etmek için şifreni gir.</p>{{if .}}<p class="error">Şifre yanlış.</p>{{end}}<form method="post" action="/stories-login"><label>Şifre<input name="password" type="password" required autofocus autocomplete="current-password"></label><button>Giriş yap</button></form></main></body></html>`))
+
 var adminPage = template.Must(template.New("admin").Parse(`<!doctype html>
 <html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Hikâye yayınla</title><style>
 *{box-sizing:border-box}body{margin:0;background:#101018;color:#eee;font:16px system-ui,sans-serif}main{max-width:620px;margin:auto;padding:24px 16px}h1{font-size:25px}form,.story{display:grid;gap:12px;background:#1c1c28;padding:18px;border-radius:14px;margin:16px 0}label{display:grid;gap:6px;font-size:14px;color:#bbb}input,textarea,select,button{width:100%;font:inherit;color:#fff;background:#29293a;border:1px solid #45455d;border-radius:9px;padding:12px}textarea{min-height:90px;resize:vertical}button{border:0;background:#745bea;font-weight:700;cursor:pointer}.delete{width:auto;background:#9c3344;padding:8px 12px}.story{display:flex;align-items:center;justify-content:space-between}.story form{display:block;background:none;padding:0;margin:0}.story small{color:#aaa}.hint{color:#aaa;font-size:13px}
-</style></head><body><main><h1>Yeni hikâye</h1>
+</style></head><body><main><form method="post" action="/stories-logout" style="float:right;background:none;padding:0;margin:0"><button class="delete">Çıkış</button></form><h1>Yeni hikâye</h1>
 <form method="post" action="/stories-api" enctype="multipart/form-data">
 <label>Tür<select name="type"><option value="text">Metin</option><option value="image">Fotoğraf</option><option value="link">Bağlantı</option></select></label>
 <label>Ana metin<textarea name="text" required maxlength="1000"></textarea></label>

@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -25,5 +27,17 @@ func TestValidationAndImage(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(dir, "test.png")); err != nil {
 		t.Fatal("PNG was not saved")
+	}
+}
+
+func TestSession(t *testing.T) {
+	a := &app{password: "secret"}
+	r := httptest.NewRequest("GET", "/stories-admin", nil)
+	if a.authorized(r) {
+		t.Fatal("request without a session was authorized")
+	}
+	r.AddCookie(&http.Cookie{Name: "story_session", Value: a.sessionToken()})
+	if !a.authorized(r) {
+		t.Fatal("valid session was rejected")
 	}
 }
