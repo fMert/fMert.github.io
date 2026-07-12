@@ -597,8 +597,6 @@ button:focus-visible,
   inset: 0;
   z-index: 1100;
   background: rgb(4 4 8 / 92%);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -693,7 +691,9 @@ button:focus-visible,
       border-radius: 999px;
       background: #fff;
       width: 0;
-      transition: width 0.1s linear;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.1s linear;
     }
   }
 

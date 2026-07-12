@@ -170,7 +170,7 @@
     $('.sv-prev').style.visibility = idx === 0 ? 'hidden' : '';
 
     Array.prototype.forEach.call(barsEl.children, function (bar, i) {
-      bar.firstElementChild.style.width = i < idx ? '100%' : '0%';
+      bar.firstElementChild.style.transform = 'scaleX(' + (i < idx ? 1 : 0) + ')';
     });
   }
 
@@ -181,7 +181,7 @@
     timer = setInterval(function () {
       if (paused) return;
       progress += 100 / (DURATION / 100);
-      fill.style.width = Math.min(progress, 100) + '%';
+      fill.style.transform = 'scaleX(' + Math.min(progress / 100, 1) + ')';
       if (progress >= 100) next();
     }, 100);
   }
