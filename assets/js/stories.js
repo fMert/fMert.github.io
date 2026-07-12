@@ -245,7 +245,7 @@
 
   }
 
-  fetch('/stories-api', { cache: 'no-store' })
+  fetch('/stories-api?fresh=' + Date.now(), { cache: 'no-store' })
     .then(function (response) {
       if (!response.ok) throw new Error('Story service unavailable');
       return response.json();
