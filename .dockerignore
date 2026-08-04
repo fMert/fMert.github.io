@@ -1,6 +1,10 @@
 .git
 _site
 .jekyll-cache
-deploy/data
+deploy/data/*
+!deploy/data/posts
+!deploy/data/posts/**
+deploy/data/posts/.publish-trigger
+deploy/data/posts/.publish-status
 deploy/.env
 design_handoff_blog_stories

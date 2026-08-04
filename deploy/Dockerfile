@@ -4,6 +4,8 @@ WORKDIR /src
 COPY Gemfile Gemfile.lock* ./
 RUN bundle config set without test && bundle install --jobs 4 --retry 3
 COPY . ./
+# Yönetim panelinden oluşturulan kalıcı Markdown dosyalarını Jekyll koleksiyonuna ekle.
+COPY deploy/data/posts/ ./_posts/
 ENV JEKYLL_ENV=production
 RUN bundle exec jekyll build --destination /site
 

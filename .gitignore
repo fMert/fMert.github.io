@@ -6,7 +6,10 @@ Gemfile.lock
 # Jekyll cache
 .jekyll-cache
 .env
-deploy/data/
+deploy/data/*
+!deploy/data/posts/
+deploy/data/posts/*
+!deploy/data/posts/.gitkeep
 .jekyll-metadata
 _site
 

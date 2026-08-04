@@ -3,6 +3,8 @@ set -euo pipefail
 
 APP_DIR=/opt/apps/fmert-blog
 SOURCE_DIR="$APP_DIR/source"
+exec 9>/run/fmert-blog-deploy.lock
+flock 9
 cd "$SOURCE_DIR"
 git fetch --prune origin main
 REMOTE_REVISION=$(git rev-parse origin/main)
