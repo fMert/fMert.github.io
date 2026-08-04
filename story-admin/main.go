@@ -306,26 +306,261 @@ func env(name, fallback string) string {
 }
 
 var loginPage = template.Must(template.New("login").Parse(`<!doctype html>
-<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hikâye girişi</title><style>
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#101018;color:#eee;font:16px system-ui,sans-serif}main{width:min(92%,400px);background:#1c1c28;padding:26px;border-radius:16px}h1{margin-top:0}label{display:grid;gap:8px;color:#bbb}input,button{width:100%;font:inherit;color:#fff;background:#29293a;border:1px solid #45455d;border-radius:9px;padding:13px}button{margin-top:16px;border:0;background:#745bea;font-weight:700}.error{color:#ff8d9d}
-</style></head><body><main><h1>Hikâye yayınla</h1><p>Devam etmek için şifreni gir.</p>{{if .}}<p class="error">Şifre yanlış.</p>{{end}}<form method="post" action="/stories-login"><label>Şifre<input name="password" type="password" required autofocus autocomplete="current-password"></label><button>Giriş yap</button></form></main></body></html>`))
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Hikâye stüdyosu · Giriş</title>
+  <style>
+    :root{--bg:#0b0b11;--surface:#15151f;--surface-2:#1d1d29;--line:#2b2b3a;--text:#f5f3ff;--muted:#9896a8;--accent:#8067f2;--accent-2:#a68cff;--danger:#ff788b}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 0,rgba(128,103,242,.14),transparent 38%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .login{width:min(100%,420px)}.brand{display:flex;align-items:center;gap:11px;margin-bottom:22px;color:#c5bddf;font-size:13px;font-weight:700;letter-spacing:.04em}.brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,var(--accent-2),#6448e7);box-shadow:0 10px 30px rgba(100,72,231,.28);font-size:17px}.card{padding:30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(155deg,rgba(29,29,41,.95),rgba(18,18,27,.98));box-shadow:0 30px 80px rgba(0,0,0,.38)}
+    .eyebrow{margin:0 0 7px;color:var(--accent-2);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}h1{margin:0;font-size:28px;letter-spacing:-.035em}p{margin:8px 0 24px;color:var(--muted)}label{display:grid;gap:8px;color:#c8c6d1;font-size:13px;font-weight:700}.password{position:relative}.password input{padding-right:70px}input,button{width:100%;border-radius:12px;font:inherit}input{height:50px;padding:0 14px;border:1px solid var(--line);outline:0;background:#101018;color:var(--text);transition:border-color .2s,box-shadow .2s}input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(128,103,242,.14)}.show{position:absolute;right:6px;bottom:6px;width:auto;height:38px;padding:0 10px;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;font-weight:700}.submit{height:50px;margin-top:16px;border:0;background:linear-gradient(135deg,var(--accent),#654ae3);color:#fff;font-weight:800;cursor:pointer;box-shadow:0 12px 30px rgba(101,74,227,.25)}.submit:hover{filter:brightness(1.08)}.error{margin:0 0 18px;padding:11px 13px;border:1px solid rgba(255,120,139,.28);border-radius:11px;background:rgba(255,120,139,.08);color:#ffadba;font-size:13px}
+    @media(max-width:520px){.card{padding:24px;border-radius:20px}h1{font-size:25px}}
+  </style>
+</head>
+<body>
+  <main class="login">
+    <div class="brand"><span class="brand-mark">✦</span> fmert.me</div>
+    <section class="card">
+      <p class="eyebrow">Yönetim paneli</p>
+      <h1>Hikâye stüdyosu</h1>
+      <p>Hikâyelerini oluşturmak ve yönetmek için giriş yap.</p>
+      {{if .}}<div class="error" role="alert">Şifre yanlış. Tekrar deneyebilirsin.</div>{{end}}
+      <form method="post" action="/stories-login">
+        <label>Şifre
+          <span class="password">
+            <input id="password" name="password" type="password" required autofocus autocomplete="current-password">
+            <button class="show" type="button" aria-controls="password">Göster</button>
+          </span>
+        </label>
+        <button class="submit">Giriş yap</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    var show=document.querySelector('.show'),password=document.getElementById('password');
+    show.addEventListener('click',function(){var visible=password.type==='text';password.type=visible?'password':'text';show.textContent=visible?'Göster':'Gizle';password.focus()});
+  </script>
+</body>
+</html>`))
 
 var adminPage = template.Must(template.New("admin").Parse(`<!doctype html>
-<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hikâye yayınla</title><style>
-*{box-sizing:border-box}body{margin:0;background:#101018;color:#eee;font:16px system-ui,sans-serif}main{max-width:620px;margin:auto;padding:24px 16px}h1{font-size:25px}form,.story{display:grid;gap:12px;background:#1c1c28;padding:18px;border-radius:14px;margin:16px 0}label{display:grid;gap:6px;font-size:14px;color:#bbb}input,textarea,select,button{width:100%;font:inherit;color:#fff;background:#29293a;border:1px solid #45455d;border-radius:9px;padding:12px}textarea{min-height:90px;resize:vertical}button{border:0;background:#745bea;font-weight:700;cursor:pointer}.delete{width:auto;background:#9c3344;padding:8px 12px}.story{display:flex;align-items:center;justify-content:space-between}.story form{display:block;background:none;padding:0;margin:0}.story small{color:#aaa}.hint{color:#aaa;font-size:13px}
-</style></head><body><main><form method="post" action="/stories-logout" style="float:right;background:none;padding:0;margin:0"><button class="delete">Çıkış</button></form><h1>Yeni hikâye</h1>
-<form method="post" action="/stories-api" enctype="multipart/form-data">
-<label>Tür<select name="type"><option value="text">Metin</option><option value="image">Fotoğraf</option><option value="link">Bağlantı</option></select></label>
-<label>Ana metin<textarea name="text" required maxlength="1000"></textarea></label>
-<label>Kısa kart başlığı<input name="title" maxlength="120"></label>
-<label>Alt metin<textarea name="subtext" maxlength="1000"></textarea></label>
-<label>Fotoğraf (en fazla 10 MB)<input name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label>
-<label>Bağlantı<input name="link" placeholder="/posts/… veya https://…"></label>
-<label>Bağlantı düğmesi<input name="link_label" maxlength="80" value="Aç"></label>
-<label>Arka plan CSS'i<input name="bg" value="linear-gradient(160deg, #16171f, #241f3d)"></label>
-<button>Şimdi yayınla</button><div class="hint">Yayın saati otomatik eklenir ve hikâye 24 saat yeni görünür.</div>
-</form><h1>Yayınlananlar</h1>
-{{range .}}<div class="story"><div><strong>{{.Title}}</strong><br><small>{{.Text}} · {{.Posted}}</small></div><form method="post" action="/stories-api/delete"><input type="hidden" name="id" value="{{.ID}}"><button class="delete">Sil</button></form></div>{{else}}<p class="hint">Henüz hikâye yok.</p>{{end}}
-</main></body></html>`))
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Hikâye stüdyosu</title>
+  <style>
+    :root{--bg:#0b0b11;--surface:#14141d;--surface-2:#1a1a25;--surface-3:#20202d;--line:#2b2b3a;--line-soft:#232330;--text:#f5f3ff;--muted:#9795a6;--muted-2:#747283;--accent:#8067f2;--accent-2:#a78fff;--success:#55d6a7;--danger:#ff7187;--shadow:0 22px 70px rgba(0,0,0,.28)}
+    *{box-sizing:border-box}[hidden]{display:none!important}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 48% -15%,rgba(128,103,242,.12),transparent 34%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea{font:inherit}button,a{-webkit-tap-highlight-color:transparent}.topbar{position:sticky;top:0;z-index:20;border-bottom:1px solid rgba(43,43,58,.82);background:rgba(11,11,17,.86);backdrop-filter:blur(18px)}.topbar-inner{max-width:1180px;height:68px;margin:auto;padding:0 22px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.015em}.brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,var(--accent-2),#6448e7);box-shadow:0 9px 25px rgba(100,72,231,.25)}.brand small{display:block;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.02em}.top-actions{display:flex;align-items:center;gap:8px}.ghost,.logout{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:38px;padding:0 13px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:#cbc8d8;text-decoration:none;font-weight:700;cursor:pointer}.logout{width:38px;padding:0;color:var(--muted)}.logout-form{margin:0}.ghost:hover,.logout:hover{border-color:#45435a;color:#fff}
+    main{max-width:1180px;margin:auto;padding:32px 22px 60px}.intro{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:24px}.eyebrow{margin:0 0 5px;color:var(--accent-2);font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}h1,h2,p{margin-top:0}h1{margin-bottom:5px;font-size:30px;letter-spacing:-.04em}.intro-copy{margin:0;color:var(--muted)}.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;font-weight:700}.status-dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 0 4px rgba(85,214,167,.1)}
+    .workspace{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:start}.panel{border:1px solid var(--line-soft);border-radius:20px;background:linear-gradient(155deg,rgba(22,22,32,.98),rgba(17,17,25,.98));box-shadow:var(--shadow)}.composer{padding:22px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}.section-head h2{margin:0;font-size:17px;letter-spacing:-.02em}.section-head span{color:var(--muted-2);font-size:12px}
+    .type-switch{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:5px;margin:0 0 22px;border:1px solid var(--line-soft);border-radius:13px;background:#101018}.type-option{position:relative}.type-option input{position:absolute;opacity:0;pointer-events:none}.type-option span{height:42px;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:9px;color:var(--muted);font-size:13px;font-weight:800;cursor:pointer;transition:.2s}.type-option input:checked+span{background:var(--surface-3);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.22)}.type-option input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}.type-icon{font-size:15px}
+    .fields{display:grid;gap:17px}.field{display:grid;gap:7px}.field[hidden]{display:none}.label-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.label{color:#d1cfda;font-size:12px;font-weight:800}.optional{color:var(--muted-2);font-size:11px;font-weight:600}.counter{color:var(--muted-2);font-size:11px;font-variant-numeric:tabular-nums}.control{width:100%;border:1px solid var(--line);border-radius:11px;outline:0;background:#101018;color:var(--text);transition:border-color .2s,box-shadow .2s}.control:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(128,103,242,.13)}input.control{height:45px;padding:0 13px}textarea.control{min-height:112px;padding:12px 13px;resize:vertical}.help{margin:0;color:var(--muted-2);font-size:11px}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:13px}.upload{min-height:120px;display:grid;place-items:center;padding:18px;border:1px dashed #3c3a50;border-radius:13px;background:#101018;text-align:center;cursor:pointer;transition:.2s}.upload:hover,.upload.drag{border-color:var(--accent);background:rgba(128,103,242,.06)}.upload input{position:absolute;width:1px;height:1px;opacity:0}.upload-icon{display:grid;place-items:center;width:36px;height:36px;margin:0 auto 8px;border-radius:11px;background:var(--surface-3);color:var(--accent-2);font-size:18px}.upload strong{display:block;font-size:13px}.upload small{display:block;margin-top:3px;color:var(--muted-2);font-size:11px}.presets{display:flex;gap:9px;flex-wrap:wrap}.preset{width:34px;height:34px;padding:0;border:2px solid transparent;border-radius:10px;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}.preset.active{border-color:#fff;box-shadow:0 0 0 2px var(--accent)}details{border-top:1px solid var(--line-soft);padding-top:14px}summary{color:#b9b6c6;font-size:12px;font-weight:800;cursor:pointer;user-select:none}details .field{margin-top:13px}.form-error{display:none;padding:11px 13px;border:1px solid rgba(255,113,135,.25);border-radius:11px;background:rgba(255,113,135,.08);color:#ffacb9;font-size:12px}.form-error.show{display:block}.publish-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:4px}.publish-note{margin:0;color:var(--muted-2);font-size:11px}.publish{min-width:150px;height:46px;padding:0 18px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--accent),#6347df);color:#fff;font-weight:850;cursor:pointer;box-shadow:0 12px 28px rgba(99,71,223,.25)}.publish:hover{filter:brightness(1.08)}.publish:disabled{opacity:.58;cursor:wait}
+    .preview-panel{position:sticky;top:92px;padding:18px}.preview-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.preview-label span:last-child{font-weight:600;letter-spacing:0;text-transform:none}.story-preview{position:relative;isolation:isolate;aspect-ratio:9/14.5;overflow:hidden;border-radius:20px;background:linear-gradient(160deg,#171824,#2a2050);box-shadow:0 18px 42px rgba(0,0,0,.35)}.story-preview:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.42),transparent 30%,rgba(0,0,0,.55))}.preview-image{position:absolute;z-index:-2;inset:0;width:100%;height:100%;object-fit:cover}.preview-image[hidden]{display:none}.progress{position:absolute;top:12px;left:12px;right:12px;height:3px;border-radius:9px;background:rgba(255,255,255,.28);overflow:hidden}.progress:after{content:"";display:block;width:62%;height:100%;background:#fff}.story-head{position:absolute;top:26px;left:14px;right:14px;display:flex;align-items:center;gap:9px}.avatar{width:30px;height:30px;border:2px solid rgba(255,255,255,.85);border-radius:50%;background:url('/assets/img/avatar.jpg') center/cover,#2b2b38}.user{font-size:12px;font-weight:800;text-shadow:0 1px 8px #000}.user small{display:block;color:rgba(255,255,255,.7);font-size:9px;font-weight:600}.badge{margin-left:auto;padding:4px 7px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:rgba(10,10,15,.28);font-size:8px;font-weight:900;letter-spacing:.1em}.preview-content{position:absolute;left:22px;right:22px;bottom:62px;text-align:center;text-shadow:0 2px 14px rgba(0,0,0,.45)}.preview-content strong{display:block;font-size:25px;line-height:1.12;letter-spacing:-.04em;overflow-wrap:anywhere}.preview-content p{margin:9px 0 0;color:rgba(255,255,255,.77);font-size:11px;line-height:1.45;overflow-wrap:anywhere}.preview-cta{position:absolute;left:22px;right:22px;bottom:18px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,255,255,.94);color:#17151f;font-size:11px;font-weight:900}.preview-cta[hidden]{display:none}.preview-tip{margin:12px 3px 0;color:var(--muted-2);font-size:11px;text-align:center}
+    .library{margin-top:28px;padding:22px}.library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.story-card{min-width:0;display:grid;grid-template-columns:58px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px;border:1px solid var(--line-soft);border-radius:14px;background:#111119}.story-thumb{width:58px;aspect-ratio:4/5;border-radius:10px;background:linear-gradient(150deg,#262337,#392b68);background-position:center;background-size:cover}.story-info{min-width:0}.story-info strong,.story-info span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.story-info strong{font-size:12px}.story-info span{margin-top:3px;color:var(--muted);font-size:11px}.story-meta{display:flex;align-items:center;gap:7px;margin-top:5px;color:var(--muted-2);font-size:10px}.story-state{padding:2px 6px;border-radius:99px;background:rgba(85,214,167,.1);color:#75dfba;font-weight:800}.story-state.expired{background:rgba(151,149,166,.1);color:var(--muted)}.delete-form{margin:0}.delete{width:34px;height:34px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--muted-2);cursor:pointer;font-size:17px}.delete:hover{border-color:rgba(255,113,135,.2);background:rgba(255,113,135,.08);color:var(--danger)}.empty{grid-column:1/-1;padding:34px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center}.empty strong{display:block;margin-bottom:4px;color:#ccc9d8}.toast{position:fixed;right:20px;bottom:20px;z-index:30;max-width:340px;padding:12px 15px;border:1px solid var(--line);border-radius:12px;background:#20202b;color:#fff;box-shadow:var(--shadow);transform:translateY(20px);opacity:0;pointer-events:none;transition:.25s}.toast.show{transform:none;opacity:1}
+    @media(max-width:900px){.workspace{grid-template-columns:1fr}.preview-panel{position:relative;top:auto;max-width:390px;width:100%;margin:auto;grid-row:2}.library-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:640px){.topbar-inner{height:62px;padding:0 15px}.brand small,.ghost span{display:none}main{padding:24px 14px 45px}.intro{align-items:start}.intro .status{display:none}h1{font-size:26px}.composer,.library{padding:17px}.workspace{gap:16px}.two-col,.library-grid{grid-template-columns:1fr}.publish-row{align-items:stretch;flex-direction:column}.publish{width:100%}.story-card{grid-template-columns:52px minmax(0,1fr) auto}.story-thumb{width:52px}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="brand-mark">✦</span><span>Hikâye stüdyosu<small>fmert.me</small></span></div>
+      <div class="top-actions">
+        <a class="ghost" href="/" target="_blank" rel="noopener"><span>Siteyi aç</span> ↗</a>
+        <form class="logout-form" method="post" action="/stories-logout"><button class="logout" title="Çıkış yap" aria-label="Çıkış yap">↪</button></form>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div><p class="eyebrow">Yeni paylaşım</p><h1>Bir hikâye oluştur</h1><p class="intro-copy">İçeriğini ekle, önizle ve tek dokunuşla yayınla.</p></div>
+      <div class="status"><span class="status-dot"></span> Hikâye servisi hazır</div>
+    </section>
+
+    <div class="workspace">
+      <form class="panel composer" id="story-form" method="post" action="/stories-api" enctype="multipart/form-data">
+        <div class="section-head"><h2>İçerik</h2><span>Taslak otomatik kaydedilir</span></div>
+
+        <div class="type-switch" role="radiogroup" aria-label="Hikâye türü">
+          <label class="type-option"><input type="radio" name="type" value="text" checked><span><b class="type-icon">Aa</b> Metin</span></label>
+          <label class="type-option"><input type="radio" name="type" value="image"><span><b class="type-icon">▧</b> Fotoğraf</span></label>
+          <label class="type-option"><input type="radio" name="type" value="link"><span><b class="type-icon">↗</b> Bağlantı</span></label>
+        </div>
+
+        <div class="fields">
+          <label class="field">
+            <span class="label-row"><span class="label">Ana metin</span><span class="counter"><b id="text-count">0</b>/1000</span></span>
+            <textarea class="control" id="text" name="text" required maxlength="1000" placeholder="Ne paylaşmak istiyorsun?"></textarea>
+          </label>
+
+          <div class="field" data-types="image" hidden>
+            <span class="label">Fotoğraf</span>
+            <label class="upload" id="upload-zone">
+              <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+              <span><span class="upload-icon">＋</span><strong id="upload-title">Fotoğraf seç veya buraya bırak</strong><small>JPEG, PNG, WebP veya GIF · en fazla 10 MB</small></span>
+            </label>
+          </div>
+
+          <div class="field" data-types="text,link">
+            <span class="label">Arka plan</span>
+            <div class="presets" aria-label="Arka plan seçenekleri">
+              <button class="preset active" type="button" aria-label="Gece moru" data-bg="linear-gradient(160deg, #171824, #30215c)" style="background:linear-gradient(160deg,#171824,#30215c)"></button>
+              <button class="preset" type="button" aria-label="Gün batımı" data-bg="linear-gradient(155deg, #ec6b62, #7f3fc7)" style="background:linear-gradient(155deg,#ec6b62,#7f3fc7)"></button>
+              <button class="preset" type="button" aria-label="Okyanus" data-bg="linear-gradient(155deg, #0c6973, #17224d)" style="background:linear-gradient(155deg,#0c6973,#17224d)"></button>
+              <button class="preset" type="button" aria-label="Orman" data-bg="linear-gradient(155deg, #176b54, #17251f)" style="background:linear-gradient(155deg,#176b54,#17251f)"></button>
+              <button class="preset" type="button" aria-label="Kömür" data-bg="linear-gradient(155deg, #30303a, #111118)" style="background:linear-gradient(155deg,#30303a,#111118)"></button>
+            </div>
+          </div>
+
+          <div class="two-col" data-types="link" hidden>
+            <label class="field"><span class="label">Bağlantı</span><input class="control" id="link" name="link" placeholder="/posts/… veya https://…"></label>
+            <label class="field"><span class="label">Düğme metni</span><input class="control" id="link-label" name="link_label" maxlength="80" value="Aç"></label>
+          </div>
+
+          <details>
+            <summary>İsteğe bağlı alanlar</summary>
+            <div class="two-col">
+              <label class="field"><span class="label-row"><span class="label">Kart başlığı</span><span class="optional">İsteğe bağlı</span></span><input class="control" id="title" name="title" maxlength="120" placeholder="Ana sayfadaki kısa başlık"></label>
+              <label class="field"><span class="label-row"><span class="label">Alt metin</span><span class="optional">İsteğe bağlı</span></span><input class="control" id="subtext" name="subtext" maxlength="1000" placeholder="Kısa bir açıklama"></label>
+            </div>
+            <label class="field" data-types="text,link"><span class="label">Özel CSS arka planı</span><input class="control" id="bg" name="bg" maxlength="500" value="linear-gradient(160deg, #171824, #30215c)"></label>
+          </details>
+
+          <div class="form-error" id="form-error" role="alert"></div>
+          <div class="publish-row">
+            <p class="publish-note">Yayın saati otomatik eklenir.<br>Hikâye 24 saat boyunca yeni görünür.</p>
+            <button class="publish" id="publish" type="submit">Şimdi yayınla</button>
+          </div>
+        </div>
+      </form>
+
+      <aside class="panel preview-panel">
+        <div class="preview-label"><span>Canlı önizleme</span><span>Takipçilerinin göreceği biçim</span></div>
+        <div class="story-preview" id="preview">
+          <img class="preview-image" id="preview-image" alt="Seçilen fotoğrafın önizlemesi" hidden>
+          <div class="progress"></div>
+          <div class="story-head"><span class="avatar"></span><span class="user">fmert<small>Şimdi</small></span><span class="badge" id="preview-badge">METİN</span></div>
+          <div class="preview-content"><strong id="preview-text">Hikâyen burada görünecek</strong><p id="preview-subtext">Yazdıkça önizleme anında güncellenir.</p></div>
+          <div class="preview-cta" id="preview-cta" hidden>Bağlantıyı aç ↑</div>
+        </div>
+        <p class="preview-tip">İpucu: Kısa ve net metinler mobil ekranda daha güçlü görünür.</p>
+      </aside>
+    </div>
+
+    <section class="panel library">
+      <div class="section-head"><h2>Yayınlanan hikâyeler</h2><span>{{len .}} hikâye</span></div>
+      <div class="library-grid">
+        {{range .}}
+        <article class="story-card" data-posted="{{.Posted}}">
+          <div class="story-thumb" data-image="{{.Image}}" data-bg="{{.BG}}"></div>
+          <div class="story-info">
+            <strong>{{if .Title}}{{.Title}}{{else}}{{.Text}}{{end}}</strong>
+            <span>{{.Text}}</span>
+            <div class="story-meta"><span class="story-state">Yeni</span><time>{{.Posted}}</time></div>
+          </div>
+          <form class="delete-form" method="post" action="/stories-api/delete"><input type="hidden" name="id" value="{{.ID}}"><button class="delete" title="Hikâyeyi sil" aria-label="Hikâyeyi sil">×</button></form>
+        </article>
+        {{else}}
+        <div class="empty"><strong>Henüz hikâye yok</strong>İlk hikâyeni yukarıdaki oluşturucudan yayınlayabilirsin.</div>
+        {{end}}
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    (function(){
+      'use strict';
+      var form=document.getElementById('story-form');
+      var textInput=document.getElementById('text');
+      var subtextInput=document.getElementById('subtext');
+      var imageInput=document.getElementById('image');
+      var linkInput=document.getElementById('link');
+      var linkLabel=document.getElementById('link-label');
+      var bgInput=document.getElementById('bg');
+      var preview=document.getElementById('preview');
+      var previewImage=document.getElementById('preview-image');
+      var previewText=document.getElementById('preview-text');
+      var previewSubtext=document.getElementById('preview-subtext');
+      var previewBadge=document.getElementById('preview-badge');
+      var previewCTA=document.getElementById('preview-cta');
+      var uploadZone=document.getElementById('upload-zone');
+      var uploadTitle=document.getElementById('upload-title');
+      var publish=document.getElementById('publish');
+      var error=document.getElementById('form-error');
+      var imageURL='';
+      var draftKey='fmert-story-draft-v2';
+      var badges={text:'METİN',image:'FOTOĞRAF',link:'BAĞLANTI'};
+
+      function currentType(){return form.querySelector('input[name="type"]:checked').value}
+      function applies(el,type){return (el.dataset.types||'').split(',').indexOf(type)!==-1}
+      function syncType(){
+        var type=currentType();
+        form.querySelectorAll('[data-types]').forEach(function(el){el.hidden=!applies(el,type)});
+        imageInput.required=type==='image';
+        linkInput.required=type==='link';
+        previewBadge.textContent=badges[type];
+        previewCTA.hidden=type!=='link';
+        previewImage.hidden=type!=='image'||!imageURL;
+        syncPreview();
+      }
+      function syncPreview(){
+        var type=currentType();
+        var main=textInput.value.trim();
+        var sub=subtextInput.value.trim();
+        previewText.textContent=main||'Hikâyen burada görünecek';
+        previewSubtext.textContent=sub||(main?'':'Yazdıkça önizleme anında güncellenir.');
+        previewSubtext.hidden=!sub&&!!main;
+        previewCTA.textContent=(linkLabel.value.trim()||'Aç')+' ↑';
+        if(type!=='image') preview.style.background=bgInput.value||'linear-gradient(160deg, #171824, #30215c)';
+        document.getElementById('text-count').textContent=textInput.value.length;
+      }
+      function saveDraft(){
+        var draft={type:currentType(),text:textInput.value,title:document.getElementById('title').value,subtext:subtextInput.value,link:linkInput.value,linkLabel:linkLabel.value,bg:bgInput.value};
+        try{localStorage.setItem(draftKey,JSON.stringify(draft))}catch(e){}
+      }
+      function restoreDraft(){
+        try{
+          var draft=JSON.parse(localStorage.getItem(draftKey)||'null');
+          if(!draft)return;
+          var radio=form.querySelector('input[name="type"][value="'+draft.type+'"]');
+          if(radio)radio.checked=true;
+          textInput.value=draft.text||'';document.getElementById('title').value=draft.title||'';subtextInput.value=draft.subtext||'';linkInput.value=draft.link||'';linkLabel.value=draft.linkLabel||'Aç';bgInput.value=draft.bg||bgInput.value;
+        }catch(e){}
+      }
+      function selectFile(file){
+        if(!file)return;
+        if(file.size>10*1024*1024){showError('Fotoğraf 10 MB sınırını aşıyor.');imageInput.value='';return}
+        if(imageURL)URL.revokeObjectURL(imageURL);
+        imageURL=URL.createObjectURL(file);previewImage.src=imageURL;previewImage.hidden=false;uploadTitle.textContent=file.name;syncPreview();
+      }
+      function showError(message){error.textContent=message;error.classList.add('show');error.scrollIntoView({behavior:'smooth',block:'nearest'})}
+      function showToast(message){var toast=document.getElementById('toast');toast.textContent=message;toast.classList.add('show');setTimeout(function(){toast.classList.remove('show')},2200)}
+
+      restoreDraft();syncType();
+      form.addEventListener('input',function(){error.classList.remove('show');syncPreview();saveDraft()});
+      form.addEventListener('change',function(event){if(event.target===imageInput)selectFile(imageInput.files[0]);syncType();saveDraft()});
+      form.querySelectorAll('.preset').forEach(function(button){button.addEventListener('click',function(){form.querySelectorAll('.preset').forEach(function(item){item.classList.remove('active')});button.classList.add('active');bgInput.value=button.dataset.bg;syncPreview();saveDraft()})});
+      ['dragenter','dragover'].forEach(function(name){uploadZone.addEventListener(name,function(event){event.preventDefault();uploadZone.classList.add('drag')})});
+      ['dragleave','drop'].forEach(function(name){uploadZone.addEventListener(name,function(event){event.preventDefault();uploadZone.classList.remove('drag')})});
+      uploadZone.addEventListener('drop',function(event){var file=event.dataTransfer.files[0];if(file){var transfer=new DataTransfer();transfer.items.add(file);imageInput.files=transfer.files;selectFile(file)}});
+      form.addEventListener('submit',function(event){
+        event.preventDefault();error.classList.remove('show');publish.disabled=true;publish.textContent='Yayınlanıyor…';
+        fetch(form.action,{method:'POST',body:new FormData(form)}).then(function(response){if(!response.ok)return response.text().then(function(message){throw new Error(message.trim())});try{localStorage.removeItem(draftKey)}catch(e){}showToast('Hikâye yayınlandı');setTimeout(function(){location.reload()},450)}).catch(function(reason){showError(reason.message||'Hikâye yayınlanamadı.');publish.disabled=false;publish.textContent='Şimdi yayınla'});
+      });
+      document.querySelectorAll('.delete-form').forEach(function(deleteForm){deleteForm.addEventListener('submit',function(event){if(!confirm('Bu hikâyeyi kalıcı olarak silmek istiyor musun?'))event.preventDefault()})});
+      document.querySelectorAll('.story-card').forEach(function(card){
+        var thumb=card.querySelector('.story-thumb');if(thumb.dataset.image)thumb.style.backgroundImage='url("'+thumb.dataset.image+'")';else if(thumb.dataset.bg)thumb.style.background=thumb.dataset.bg;
+        var date=new Date(card.dataset.posted),hours=(Date.now()-date.getTime())/3600000,state=card.querySelector('.story-state');if(hours>=24){state.textContent='Arşiv';state.classList.add('expired')}
+        var time=card.querySelector('time');time.textContent=isNaN(date.getTime())?'':date.toLocaleString('tr-TR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      });
+    })();
+  </script>
+</body>
+</html>`))

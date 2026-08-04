@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -39,5 +40,24 @@ func TestSession(t *testing.T) {
 	r.AddCookie(&http.Cookie{Name: "story_session", Value: a.sessionToken()})
 	if !a.authorized(r) {
 		t.Fatal("valid session was rejected")
+	}
+}
+
+func TestAdminPageIncludesComposerAndPreview(t *testing.T) {
+	a := &app{dataDir: t.TempDir(), password: "secret"}
+	r := httptest.NewRequest("GET", "/stories-admin", nil)
+	r.AddCookie(&http.Cookie{Name: "story_session", Value: a.sessionToken()})
+	w := httptest.NewRecorder()
+
+	a.admin(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("admin page returned %d", w.Code)
+	}
+	body := w.Body.String()
+	for _, expected := range []string{`id="story-form"`, `id="preview"`, `Canlı önizleme`, `Yayınlanan hikâyeler`} {
+		if !strings.Contains(body, expected) {
+			t.Fatalf("admin page is missing %q", expected)
+		}
 	}
 }
