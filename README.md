@@ -12,10 +12,11 @@ Personal blog of **Furkan Mert Bağcı** — posts about my projects (Queyntisen
 
 - **Violet reskin** — the entire theme is recolored through CSS custom properties in `assets/css/jekyll-theme-chirpy.scss`. Both light and dark modes work; the theme's own toggle is untouched.
 - **Stories** — an Instagram-style "Hikayeler" row on the homepage with a fullscreen viewer (progress bars, auto-advance, tap zones, keyboard navigation). Vanilla JS, no dependencies.
+- **Content studio** — the password-protected `/stories-admin` panel has separate Stories and Posts tabs. Posts can be written in Markdown with a live preview; dates, slugs, categories, and tags are generated automatically without an external AI API.
 
 ## Stories
 
-New stories are published from the password-protected `/stories-admin` page.
+New stories are published from the Stories tab of the password-protected `/stories-admin` page.
 The companion service in `story-admin/` stores its JSON and uploads in the
 mounted `deploy/data/` directory; story content is therefore kept across image
 rebuilds and is never committed. The Jekyll data below is an offline fallback.
@@ -54,6 +55,16 @@ docker compose up -d --build
 
 > Note: story images are CSS backgrounds rather than `<img>` tags, because Chirpy's `refactor-content.html` rewrites raw `<img>` markup in layout content.
 
+## Publishing posts from the admin
+
+The Posts tab in `/stories-admin` saves Markdown drafts in the browser and
+publishes completed posts into the persistent, Git-ignored
+`deploy/data/posts/` directory. The production path unit watches for new posts
+and runs `deploy/publish-posts.sh`, which rebuilds only the blog container,
+checks the new post URL, and keeps the previous image available for rollback.
+Panel-created posts therefore survive regular Git deployments without being
+committed to the repository.
+
 ## Running locally
 
 ```bash
@@ -72,8 +83,9 @@ Requires Ruby ≥ 3.1.
 ## Deployment
 
 Pushing to `main` runs the build checks. The VPS timer pulls `main` and runs
-`deploy/update-blog.sh`; Caddy routes the static blog and story service.
+`deploy/update-blog.sh`; Caddy routes the static blog and content studio. Post
+publishing is handled separately by `fmert-blog-post-publish.path`.
 
 ## License
 
-Content © Furkan Mert Bağcı. Theme code under the [MIT License](https://github.com/cotes2020/chirpy-starter/blob/master/LICENSE) (Chirpy starter).
+The source code is open source under the [MIT License](LICENSE). Blog content © Furkan Mert Bağcı. The project is based on the MIT-licensed [Chirpy starter](https://github.com/cotes2020/chirpy-starter).
