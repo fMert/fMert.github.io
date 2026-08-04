@@ -85,7 +85,7 @@ layout: default
             {% assign lqip_attr = 'lqip="' | append: lqip | append: '"' %}
           {% endif %}
 
-          {% assign alt = post.image.alt | xml_escape | default: 'Preview Image' %}
+          {% assign alt = post.image.alt | xml_escape | default: 'Yazı önizleme görseli' %}
 
           <div class="col-md-5">
             <img src="{{ src }}" alt="{{ alt }}" {{ lqip_attr }}>

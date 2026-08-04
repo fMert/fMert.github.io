@@ -247,7 +247,7 @@
 
   fetch('/stories-api?fresh=' + Date.now(), { cache: 'no-store' })
     .then(function (response) {
-      if (!response.ok) throw new Error('Story service unavailable');
+      if (!response.ok) throw new Error('Hikâye servisine ulaşılamadı');
       return response.json();
     })
     .then(renderLiveCards)

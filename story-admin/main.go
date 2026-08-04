@@ -52,7 +52,7 @@ func main() {
 	}
 	a := &app{dataDir: env("DATA_DIR", "/data"), password: os.Getenv("STORY_PASSWORD")}
 	if a.password == "" {
-		log.Fatal("STORY_PASSWORD is required")
+		log.Fatal("STORY_PASSWORD ortam değişkeni zorunludur")
 	}
 	if err := os.MkdirAll(filepath.Join(a.dataDir, "media"), 0755); err != nil {
 		log.Fatal(err)
@@ -68,14 +68,14 @@ func main() {
 	mux.Handle("GET /story-media/", http.StripPrefix("/story-media/", http.FileServer(http.Dir(filepath.Join(a.dataDir, "media")))))
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNoContent) })
 
-	log.Println("story admin listening on :8081")
+	log.Println("hikâye yönetimi :8081 portunu dinliyor")
 	log.Fatal(http.ListenAndServe(":8081", mux))
 }
 
 func (a *app) list(w http.ResponseWriter, _ *http.Request) {
 	stories, err := a.load()
 	if err != nil {
-		http.Error(w, "Could not load stories", http.StatusInternalServerError)
+		http.Error(w, "Hikâyeler yüklenemedi", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -91,7 +91,7 @@ func (a *app) admin(w http.ResponseWriter, r *http.Request) {
 	}
 	stories, err := a.load()
 	if err != nil {
-		http.Error(w, "Could not load stories", http.StatusInternalServerError)
+		http.Error(w, "Hikâyeler yüklenemedi", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -105,7 +105,7 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, 12<<20)
 	if err := r.ParseMultipartForm(12 << 20); err != nil {
-		http.Error(w, "Upload is too large (maximum 10 MB)", http.StatusBadRequest)
+		http.Error(w, "Yüklenen dosya çok büyük (en fazla 10 MB)", http.StatusBadRequest)
 		return
 	}
 
@@ -135,11 +135,11 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
 		}
 		s.Image = "/story-media/" + s.ID + ext
 	} else if !errors.Is(err, http.ErrMissingFile) {
-		http.Error(w, "Could not read image", http.StatusBadRequest)
+		http.Error(w, "Görsel okunamadı", http.StatusBadRequest)
 		return
 	}
 	if s.Type == "image" && s.Image == "" {
-		http.Error(w, "Image stories need an image", http.StatusBadRequest)
+		http.Error(w, "Fotoğraf türündeki hikâyeler için görsel gereklidir", http.StatusBadRequest)
 		return
 	}
 
@@ -151,7 +151,7 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
 		err = a.saveUnlocked(stories)
 	}
 	if err != nil {
-		http.Error(w, "Could not save story", http.StatusInternalServerError)
+		http.Error(w, "Hikâye kaydedilemedi", http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/stories-admin", http.StatusSeeOther)
@@ -167,7 +167,7 @@ func (a *app) delete(w http.ResponseWriter, r *http.Request) {
 	defer a.mu.Unlock()
 	stories, err := a.loadUnlocked()
 	if err != nil {
-		http.Error(w, "Could not load stories", http.StatusInternalServerError)
+		http.Error(w, "Hikâyeler yüklenemedi", http.StatusInternalServerError)
 		return
 	}
 	kept := stories[:0]
@@ -181,7 +181,7 @@ func (a *app) delete(w http.ResponseWriter, r *http.Request) {
 		kept = append(kept, s)
 	}
 	if err := a.saveUnlocked(kept); err != nil {
-		http.Error(w, "Could not delete story", http.StatusInternalServerError)
+		http.Error(w, "Hikâye silinemedi", http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/stories-admin", http.StatusSeeOther)
@@ -260,15 +260,15 @@ func (a *app) saveUnlocked(stories []Story) error {
 
 func validate(s Story) error {
 	if s.Type != "text" && s.Type != "image" && s.Type != "link" {
-		return errors.New("invalid story type")
+		return errors.New("geçersiz hikâye türü")
 	}
 	if s.Text == "" || len(s.Text) > 1000 || len(s.Title) > 120 || len(s.Subtext) > 1000 || len(s.BG) > 500 || len(s.LinkLabel) > 80 {
-		return errors.New("required text is missing or a field is too long")
+		return errors.New("zorunlu metin eksik veya alanlardan biri çok uzun")
 	}
 	if s.Link != "" {
 		u, err := url.Parse(s.Link)
 		if err != nil || strings.HasPrefix(s.Link, "//") || (!strings.HasPrefix(s.Link, "/") && u.Scheme != "http" && u.Scheme != "https") {
-			return errors.New("link must start with /, http://, or https://")
+			return errors.New("bağlantı /, http:// veya https:// ile başlamalıdır")
 		}
 	}
 	return nil
@@ -276,16 +276,16 @@ func validate(s Story) error {
 
 func saveImage(dir, id string, src io.Reader, size int64) (string, error) {
 	if size > 10<<20 {
-		return "", errors.New("image is too large (maximum 10 MB)")
+		return "", errors.New("görsel çok büyük (en fazla 10 MB)")
 	}
 	b, err := io.ReadAll(io.LimitReader(src, 10<<20+1))
 	if err != nil || len(b) > 10<<20 {
-		return "", errors.New("image is too large (maximum 10 MB)")
+		return "", errors.New("görsel çok büyük (en fazla 10 MB)")
 	}
 	extensions := map[string]string{"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif"}
 	ext, ok := extensions[http.DetectContentType(b)]
 	if !ok {
-		return "", errors.New("image must be JPEG, PNG, WebP, or GIF")
+		return "", errors.New("görsel JPEG, PNG, WebP veya GIF biçiminde olmalıdır")
 	}
 	return ext, os.WriteFile(filepath.Join(dir, id+ext), b, 0644)
 }
