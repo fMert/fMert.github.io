@@ -1,6 +1,7 @@
 ---
 # the default layout is 'page'
 title: About
+seo_title: Furkan Mert Bağcı (fMert) Hakkında
 description: >-
   Furkan Mert Bağcı (fMert) hakkında; yazılım, Linux, açık kaynak, yapay zekâ ve kişisel projeler odağındaki çalışmalarını ve ilgi alanlarını keşfedin.
 permalink: /about/
