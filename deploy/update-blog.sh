@@ -21,16 +21,14 @@ git reset --hard origin/main
 git submodule sync --recursive
 git submodule update --init --recursive
 
-caddy validate --config deploy/Caddyfile
+# Caddy is shared with other applications on this server. Its system-wide
+# configuration is managed separately; this updater only deploys the blog.
 docker compose --env-file deploy/.env -f deploy/docker-compose.yml build --pull
 docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --remove-orphans
-install -m 0644 deploy/Caddyfile /etc/caddy/Caddyfile
-systemctl reload caddy
 
 for _ in {1..30}; do
   if healthy fmert_blog && healthy fmert_story_admin; then
     printf '%s\n' "$REMOTE_REVISION" > "$APP_DIR/.deployed-revision"
-    docker image prune -f --filter 'dangling=true'
     curl --fail --silent --show-error http://127.0.0.1:8080/ >/dev/null
     curl --fail --silent --show-error http://127.0.0.1:8081/health >/dev/null
     exit 0
