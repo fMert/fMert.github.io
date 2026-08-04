@@ -130,9 +130,52 @@ func TestCreatePostWritesMarkdownAndPublishTrigger(t *testing.T) {
 		t.Fatalf("post file missing: %v", err)
 	}
 	content := string(markdown)
-	for _, expected := range []string{`title: "Terminal için küçük bir proje"`, `categories: [Proje]`, `tags: [`, `render_with_liquid: false`, `## Merhaba`} {
+	for _, expected := range []string{`title: "Terminal için küçük bir proje"`, `categories: ["Proje"]`, `tags: ["linux", "terminal"`, `render_with_liquid: false`, `## Merhaba`} {
 		if !strings.Contains(content, expected) {
 			t.Fatalf("post file is missing %q:\n%s", expected, content)
 		}
+	}
+}
+
+func TestPostMetadataListsAlwaysQuoteNumericTags(t *testing.T) {
+	metadata := inferPostMetadata("TEKNOFEST 2026 finali", "Takımımız finale kaldı.")
+	frontMatter := yamlStringList(metadata.Tags)
+	if !strings.Contains(frontMatter, `"2026"`) {
+		t.Fatalf("numeric-looking tag was not quoted: %s", frontMatter)
+	}
+}
+
+func TestCreatePostRetriesFailedFileWithoutDuplicate(t *testing.T) {
+	dataDir := t.TempDir()
+	a := &app{dataDir: dataDir, password: "secret"}
+	values := url.Values{"title": {"TEKNOFEST 2026 finali"}, "body": {"Aynı yazı yeniden denenecek."}}
+
+	create := func() *httptest.ResponseRecorder {
+		r := httptest.NewRequest("POST", "/stories-api/posts", strings.NewReader(values.Encode()))
+		r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		r.AddCookie(&http.Cookie{Name: "story_session", Value: a.sessionToken()})
+		w := httptest.NewRecorder()
+		a.createPost(w, r)
+		return w
+	}
+
+	if w := create(); w.Code != http.StatusOK {
+		t.Fatalf("first create returned %d: %s", w.Code, w.Body.String())
+	}
+	postsDir := filepath.Join(dataDir, "posts")
+	trigger, err := os.ReadFile(filepath.Join(postsDir, ".publish-trigger"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	filename := strings.TrimSpace(string(trigger))
+	if err := writeJSONAtomic(filepath.Join(postsDir, ".publish-status"), PostPublishStatus{State: "failed", File: filename}); err != nil {
+		t.Fatal(err)
+	}
+	if w := create(); w.Code != http.StatusOK {
+		t.Fatalf("retry returned %d: %s", w.Code, w.Body.String())
+	}
+	posts, err := filepath.Glob(filepath.Join(postsDir, "*.md"))
+	if err != nil || len(posts) != 1 {
+		t.Fatalf("retry created duplicate posts: %v (err=%v)", posts, err)
 	}
 }

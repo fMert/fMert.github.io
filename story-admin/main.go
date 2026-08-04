@@ -336,17 +336,21 @@ func (a *app) createPost(w http.ResponseWriter, r *http.Request) {
 
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	filename, err := uniquePostFilename(postsDir, datePrefix, metadata.Slug)
-	if err != nil {
-		http.Error(w, "Yazı dosyası hazırlanamadı", http.StatusInternalServerError)
-		return
+	filename := failedPostFilename(postsDir, title, body)
+	if filename == "" {
+		var err error
+		filename, err = uniquePostFilename(postsDir, datePrefix, metadata.Slug)
+		if err != nil {
+			http.Error(w, "Yazı dosyası hazırlanamadı", http.StatusInternalServerError)
+			return
+		}
 	}
 	titleJSON, _ := json.Marshal(title)
-	content := fmt.Sprintf("---\ntitle: %s\ndate: %s\ncategories: [%s]\ntags: [%s]\nrender_with_liquid: false\n---\n\n%s\n",
+	content := fmt.Sprintf("---\ntitle: %s\ndate: %s\ncategories: %s\ntags: %s\nrender_with_liquid: false\n---\n\n%s\n",
 		titleJSON,
 		now.Format("2006-01-02 15:04:05 -0700"),
-		metadata.Category,
-		strings.Join(metadata.Tags, ", "),
+		yamlStringList([]string{metadata.Category}),
+		yamlStringList(metadata.Tags),
 		body,
 	)
 	tmp := filepath.Join(postsDir, "."+filename+".tmp")
@@ -571,6 +575,59 @@ func uniquePostFilename(dir, datePrefix, slug string) (string, error) {
 		}
 		filename = fmt.Sprintf("%s-%d.md", base, i)
 	}
+}
+
+func failedPostFilename(dir, title, body string) string {
+	b, err := os.ReadFile(filepath.Join(dir, ".publish-status"))
+	if err != nil {
+		return ""
+	}
+	var status PostPublishStatus
+	if json.Unmarshal(b, &status) != nil || status.State != "failed" || filepath.Base(status.File) != status.File || !strings.HasSuffix(status.File, ".md") {
+		return ""
+	}
+	b, err = os.ReadFile(filepath.Join(dir, status.File))
+	if err != nil {
+		return ""
+	}
+	existingTitle, existingBody, ok := postTitleAndBody(string(b))
+	if !ok || existingTitle != title || existingBody != strings.TrimSpace(body) {
+		return ""
+	}
+	return status.File
+}
+
+func postTitleAndBody(content string) (string, string, bool) {
+	if !strings.HasPrefix(content, "---\n") {
+		return "", "", false
+	}
+	rest := strings.TrimPrefix(content, "---\n")
+	end := strings.Index(rest, "\n---\n")
+	if end < 0 {
+		return "", "", false
+	}
+	var title string
+	for _, line := range strings.Split(rest[:end], "\n") {
+		if strings.HasPrefix(line, "title: ") {
+			if json.Unmarshal([]byte(strings.TrimPrefix(line, "title: ")), &title) != nil {
+				return "", "", false
+			}
+			break
+		}
+	}
+	if title == "" {
+		return "", "", false
+	}
+	return title, strings.TrimSpace(rest[end+len("\n---\n"):]), true
+}
+
+func yamlStringList(values []string) string {
+	quoted := make([]string, 0, len(values))
+	for _, value := range values {
+		b, _ := json.Marshal(value)
+		quoted = append(quoted, string(b))
+	}
+	return "[" + strings.Join(quoted, ", ") + "]"
 }
 
 func postURL(filename string) string {
