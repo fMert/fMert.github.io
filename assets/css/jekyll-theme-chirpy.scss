@@ -320,6 +320,10 @@ button:focus-visible,
     a.nav-link {
       border-radius: 0.7rem;
       transition: background-color 0.2s ease, color 0.2s ease;
+
+      span {
+        text-transform: uppercase;
+      }
     }
 
     &.active a.nav-link {
