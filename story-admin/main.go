@@ -95,9 +95,9 @@ func main() {
 	mux.HandleFunc("GET /stories-admin", a.admin)
 	mux.HandleFunc("POST /stories-login", a.login)
 	mux.HandleFunc("POST /stories-logout", a.logout)
-	mux.HandleFunc("POST /posts-api", a.createPost)
-	mux.HandleFunc("POST /posts-api/metadata", a.postMetadata)
-	mux.HandleFunc("GET /posts-api/status", a.postStatus)
+	mux.HandleFunc("POST /stories-api/posts", a.createPost)
+	mux.HandleFunc("POST /stories-api/posts/metadata", a.postMetadata)
+	mux.HandleFunc("GET /stories-api/posts/status", a.postStatus)
 	mux.Handle("GET /story-media/", http.StripPrefix("/story-media/", http.FileServer(http.Dir(filepath.Join(a.dataDir, "media")))))
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNoContent) })
 
@@ -725,7 +725,7 @@ var adminPage = template.Must(template.New("admin").Parse(`<!doctype html>
     </section>
 
     <div class="workspace post-workspace">
-      <form class="panel composer" id="post-form" method="post" action="/posts-api">
+      <form class="panel composer" id="post-form" method="post" action="/stories-api/posts">
         <div class="section-head"><h2>Yazı</h2><span>Taslak bu cihazda saklanır</span></div>
         <div class="fields">
           <label class="field">
@@ -933,7 +933,7 @@ var adminPage = template.Must(template.New("admin").Parse(`<!doctype html>
       }
       function loadMetadata(){
         var values=new URLSearchParams();values.set('title',title.value);values.set('body',body.value);
-        fetch('/posts-api/metadata',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:values.toString()})
+        fetch('/stories-api/posts/metadata',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:values.toString()})
           .then(function(response){if(!response.ok)throw new Error();return response.json()})
           .then(function(data){document.getElementById('post-category').textContent=data.category;document.getElementById('post-preview-category').textContent=data.category;document.getElementById('post-tags').textContent=(data.tags||[]).join(', ')||'İçeriğe göre'})
           .catch(function(){});
@@ -942,7 +942,7 @@ var adminPage = template.Must(template.New("admin").Parse(`<!doctype html>
       function showState(message,type){state.className='publish-state show'+(type?' '+type:'');state.innerHTML=message}
       function pollStatus(file,url,attempt){
         if(attempt>90){showState('Yazı kaydedildi ancak yayınlama beklenenden uzun sürüyor. Biraz sonra siteyi kontrol edebilirsin.','');publish.disabled=false;publish.textContent='Yazıyı yayınla';return}
-        fetch('/posts-api/status',{cache:'no-store'}).then(function(response){if(!response.ok)throw new Error();return response.json()}).then(function(data){
+        fetch('/stories-api/posts/status',{cache:'no-store'}).then(function(response){if(!response.ok)throw new Error();return response.json()}).then(function(data){
           if(data.file===file&&data.state==='published'){showState('Yazı yayında. <a href="'+url+'" target="_blank" rel="noopener">Yazıyı aç ↗</a>','success');publish.disabled=false;publish.textContent='Yayınlandı';return}
           if(data.file===file&&data.state==='failed'){showState(escapeHTML(data.message||'Yayınlama sırasında bir sorun oluştu.'),'error');publish.disabled=false;publish.textContent='Yeniden dene';return}
           showState(escapeHTML(data.message||'Blog hazırlanıyor…'),'');setTimeout(function(){pollStatus(file,url,attempt+1)},1000);

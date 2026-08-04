@@ -75,7 +75,7 @@ func TestAdminPostsTabIncludesMarkdownEditor(t *testing.T) {
 		t.Fatalf("posts tab returned %d", w.Code)
 	}
 	body := w.Body.String()
-	for _, expected := range []string{`id="post-form"`, `id="post-body"`, `Markdown ile yaz`, `Tarih, bağlantı, kategori ve etiketler`} {
+	for _, expected := range []string{`id="post-form"`, `action="/stories-api/posts"`, `id="post-body"`, `Markdown ile yaz`, `Tarih, bağlantı, kategori ve etiketler`} {
 		if !strings.Contains(body, expected) {
 			t.Fatalf("posts tab is missing %q", expected)
 		}
@@ -106,7 +106,7 @@ func TestCreatePostWritesMarkdownAndPublishTrigger(t *testing.T) {
 		"title": {"Terminal için küçük bir proje"},
 		"body":  {"## Merhaba\n\nBu proje Linux terminalinde çalışıyor."},
 	}
-	r := httptest.NewRequest("POST", "/posts-api", strings.NewReader(values.Encode()))
+	r := httptest.NewRequest("POST", "/stories-api/posts", strings.NewReader(values.Encode()))
 	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	r.AddCookie(&http.Cookie{Name: "story_session", Value: a.sessionToken()})
 	w := httptest.NewRecorder()
