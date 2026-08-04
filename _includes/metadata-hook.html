@@ -1,0 +1,80 @@
+{% assign person_id = 'https://fmert.me/#person' %}
+{% assign website_id = 'https://fmert.me/#website' %}
+{% assign profile_id = 'https://fmert.me/about/#profilepage' %}
+{% assign image_id = 'https://fmert.me/assets/img/avatar.jpg#image' %}
+
+{% if page.url == '/' %}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": {{ website_id | jsonify }},
+          "url": {{ site.url | append: '/' | jsonify }},
+          "name": {{ site.title | jsonify }},
+          "alternateName": {{ site.author.alternate_name | jsonify }},
+          "description": {{ site.description | jsonify }},
+          "inLanguage": {{ site.lang | jsonify }},
+          "author": { "@id": {{ person_id | jsonify }} },
+          "publisher": { "@id": {{ person_id | jsonify }} }
+        },
+        {
+          "@type": "Person",
+          "@id": {{ person_id | jsonify }},
+          "name": {{ site.author.name | jsonify }},
+          "alternateName": {{ site.author.alternate_name | jsonify }},
+          "url": {{ site.url | append: '/' | jsonify }},
+          "image": { "@id": {{ image_id | jsonify }} },
+          "sameAs": ["https://github.com/fMert"]
+        },
+        {
+          "@type": "ImageObject",
+          "@id": {{ image_id | jsonify }},
+          "url": {{ site.author.image | jsonify }},
+          "contentUrl": {{ site.author.image | jsonify }},
+          "width": 472,
+          "height": 512,
+          "caption": {{ site.author.name | jsonify }}
+        }
+      ]
+    }
+  </script>
+{% elsif page.url == '/about/' %}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "ProfilePage",
+          "@id": {{ profile_id | jsonify }},
+          "url": {{ page.url | absolute_url | jsonify }},
+          "name": {{ page.seo.name | jsonify }},
+          "description": {{ page.description | jsonify }},
+          "inLanguage": {{ site.lang | jsonify }},
+          "isPartOf": { "@id": {{ website_id | jsonify }} },
+          "mainEntity": { "@id": {{ person_id | jsonify }} },
+          "primaryImageOfPage": { "@id": {{ image_id | jsonify }} }
+        },
+        {
+          "@type": "Person",
+          "@id": {{ person_id | jsonify }},
+          "name": {{ site.author.name | jsonify }},
+          "alternateName": {{ site.author.alternate_name | jsonify }},
+          "url": {{ site.url | append: '/' | jsonify }},
+          "image": { "@id": {{ image_id | jsonify }} },
+          "sameAs": ["https://github.com/fMert"]
+        },
+        {
+          "@type": "ImageObject",
+          "@id": {{ image_id | jsonify }},
+          "url": {{ site.author.image | jsonify }},
+          "contentUrl": {{ site.author.image | jsonify }},
+          "width": 472,
+          "height": 512,
+          "caption": {{ site.author.name | jsonify }}
+        }
+      ]
+    }
+  </script>
+{% endif %}
